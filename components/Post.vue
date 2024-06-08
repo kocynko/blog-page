@@ -1,18 +1,12 @@
 <script setup lang="ts">
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Heart } from "lucide-vue-next";
-import { Editor, EditorContent } from "@tiptap/vue-3";
-import Comment from "./Comment.vue";
-import CommentForm from "./CommentForm.vue";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import StarterKit from "@tiptap/starter-kit";
+import { Editor, EditorContent } from "@tiptap/vue-3";
+import { Heart } from "lucide-vue-next";
 import type { Doc } from "~/convex/_generated/dataModel";
+import CommentForm from "./CommentForm.vue";
+import Comments from "./Comments.vue";
+import { useAuth, useUser } from "vue-clerk";
 
 const props = defineProps<{
   post: Doc<"posts">;
@@ -29,22 +23,29 @@ const editor = new Editor({
     },
   },
 });
+const { userId } = useAuth();
 </script>
 
 <template>
-  <Card class="w-full space-y-8">
-    <CardContent class="max-h-[350px] overflow-y-auto">
-      <EditorContent :editor="editor" />
-    </CardContent>
-    <CardFooter class="flex flex-col items-center justify-between gap-4">
-      <div class="flex w-full items-center justify-center gap-4">
-        <CommentForm />
-        <Heart v-if="false" :size="20" fill="" />
-        <Heart v-else:size="20" fill="none" />
-      </div>
-      <Comment />
-    </CardFooter>
-  </Card>
+  <li>
+    <Card class="relative w-full space-y-8">
+      <DeletePostButton
+        :post-id="post._id"
+        v-if="post.tokenIdentifier.split('|')[1] === userId"
+      />
+      <CardContent class="max-h-[350px] overflow-y-auto">
+        <EditorContent :editor="editor" />
+      </CardContent>
+      <CardFooter class="flex flex-col items-center justify-between gap-4">
+        <div class="flex w-full items-center gap-4">
+          <CommentForm :post-id="post._id" />
+          <Heart v-if="false" :size="20" fill="" />
+          <Heart v-else :size="20" fill="none" />
+        </div>
+        <Comments :post="props.post" />
+      </CardFooter>
+    </Card>
+  </li>
 </template>
 
 <style lang="scss">

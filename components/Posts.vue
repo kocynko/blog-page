@@ -10,8 +10,8 @@ const { data: posts, isLoading: postsIsLoading } = useConvexQuery(
 
 <template>
   <div class="container flex w-full items-center justify-center">
-    <div class="flex w-2/3 flex-col gap-4">
+    <ul class="w-1/2 space-y-4">
       <Post v-for="post in posts" :key="post._id" :post="post" />
-    </div>
+    </ul>
   </div>
 </template>

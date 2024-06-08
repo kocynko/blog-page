@@ -14,16 +14,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Heart } from "lucide-vue-next";
 import { useConvexMutation } from "@convex-vue/core";
 import { api } from "~/convex/_generated/api";
 import type { Id } from "~/convex/_generated/dataModel";
 
 const props = defineProps<{
-  postId: Id<"posts">;
+  commentId: Id<"comments">;
+  onUpload: Function;
 }>();
 
-const createComment = useConvexMutation(api.comments.createComment);
+const createAnswer = useConvexMutation(api.answers.createAnswer);
 
 const formSchema = toTypedSchema(
   z.object({
@@ -36,11 +36,12 @@ const form = useForm({
 });
 
 const onSubmit = form.handleSubmit((values) => {
-  createComment.mutate({
+  createAnswer.mutate({
+    commentId: props.commentId,
     text: values.text,
-    postId: props.postId,
   });
-  form.resetForm()
+  form.resetForm();
+  props.onUpload();
 });
 </script>
 
@@ -49,10 +50,10 @@ const onSubmit = form.handleSubmit((values) => {
     <FormField v-slot="{ componentField }" name="text">
       <FormItem class="flex-1">
         <FormControl>
-          <Input type="text" placeholder="Comment" v-bind="componentField" />
+          <Input type="text" placeholder="Answer" v-bind="componentField" />
         </FormControl>
       </FormItem>
     </FormField>
-    <Button type="submit"> Comment </Button>
+    <Button type="submit"> Answer </Button>
   </form>
 </template>

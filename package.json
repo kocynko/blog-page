@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@clerk/clerk-js": "^5.5.3",
     "@convex-vue/core": "^0.0.4",
     "@tailwindcss/typography": "^0.5.13",
     "@tiptap/pm": "^2.4.0",
@@ -30,7 +31,9 @@
     "tailwindcss-animate": "^1.0.7",
     "vee-validate": "^4.13.1",
     "vue": "^3.4.27",
+    "vue-clerk": "^0.3.8",
     "vue-router": "^4.3.2",
+    "vue-timeago": "^5.1.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {

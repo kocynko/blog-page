@@ -29,6 +29,7 @@ const onSubmit = form.handleSubmit(async (values) => {
   await createDocument.mutate({
     text: values.tiptap,
   });
+  form.resetForm()
   props.onUpload();
 });
 </script>

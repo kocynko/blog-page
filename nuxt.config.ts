@@ -8,14 +8,15 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       convexUrl: process.env.CONVEX_URL,
+      clerkKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
     },
   },
-  
+
   modules: [
     "@nuxtjs/tailwindcss",
     "shadcn-nuxt",
-    '@nuxtjs/color-mode',
-    "nuxt-tiptap-editor"
+    "@nuxtjs/color-mode",
+    "nuxt-tiptap-editor",
   ],
   shadcn: {
     /**
@@ -35,7 +36,7 @@ export default defineNuxtConfig({
     },
   },
   colorMode: {
-    classSuffix: ''
+    classSuffix: "",
   },
   tiptap: {
     prefix: "Tiptap", //prefix for Tiptap imports, composables not included
