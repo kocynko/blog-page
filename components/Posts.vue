@@ -11,7 +11,14 @@ const { data: posts, isLoading: postsIsLoading } = useConvexQuery(
 <template>
   <div class="container flex w-full items-center justify-center">
     <ul class="w-1/2 space-y-4">
-      <Post v-for="post in posts" :key="post._id" :post="post" />
+      <Post
+        v-if="!postsIsLoading"
+        v-for="post in posts?.posts"
+        :key="post._id"
+        :post="post"
+        :user-id="posts?.userId"
+      />
+      <div v-else>Loading...</div>
     </ul>
   </div>
 </template>

@@ -22,9 +22,18 @@ export const createPost = mutation({
 
 export const getPosts = query({
   async handler(ctx) {
-    return await ctx.db.query("posts").collect();
+    const userId = (await ctx.auth.getUserIdentity())?.tokenIdentifier;
+    if (!userId) {
+      return null;
+    }
+    const posts = await ctx.db.query("posts").collect();
+    return {
+      posts: posts,
+      userId: userId,
+    };
   },
 });
+
 export const deletePost = mutation({
   args: {
     postId: v.id("posts"),

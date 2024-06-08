@@ -5,15 +5,15 @@
       <NewPostButton v-if="isSignedIn" />
       <div class="flex items-center justify-between gap-3" v-if="isSignedIn">
         <ModeToggle />
-        <UserButton v-if="isSignedIn" />
+        <UserButton v-if="isSignedIn" afterSignOutUrl="/" />
       </div>
-      <SignInButton v-else />
+      <Button v-else><NuxtLink to="/sign-in">Sign in</NuxtLink></Button>
     </nav>
     <slot />
   </div>
 </template>
 <script setup lang="ts">
-import { SignInButton, UserButton, useAuth, useUser } from "vue-clerk";
+import { UserButton, useAuth, useUser } from "vue-clerk";
 const { isSignedIn } = useAuth();
 const { user } = useUser();
 </script>

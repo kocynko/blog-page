@@ -5,7 +5,7 @@ import { clerkPlugin } from "vue-clerk/plugin";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(clerkPlugin, {
-    afterSignInUrl: "/",
+    fallbackRedirectUrl: "/",
     publishableKey: useRuntimeConfig().public.clerkKey as string,
   });
 

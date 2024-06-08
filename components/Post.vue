@@ -10,6 +10,7 @@ import { useAuth, useUser } from "vue-clerk";
 
 const props = defineProps<{
   post: Doc<"posts">;
+  userId: string | undefined;
 }>();
 
 const editor = new Editor({
@@ -31,7 +32,7 @@ const { userId } = useAuth();
     <Card class="relative w-full space-y-8">
       <DeletePostButton
         :post-id="post._id"
-        v-if="post.tokenIdentifier.split('|')[1] === userId"
+        v-if="post.tokenIdentifier === props.userId"
       />
       <CardContent class="max-h-[350px] overflow-y-auto">
         <EditorContent :editor="editor" />
