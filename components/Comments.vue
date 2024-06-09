@@ -6,22 +6,23 @@
     >
       Comments
     </h3>
-    <div class="space-y-4" v-if="visibleComments">
+    <ul class="space-y-8" v-if="visibleComments">
       <Comment
         v-for="comment in comments"
         :comment="comment"
+        :user="comment.user"
         v-if="comments.length > 0"
       />
-    </div>
+    </ul>
   </div>
 </template>
 <script lang="ts" setup>
 import { useConvexQuery } from "@convex-vue/core";
 import { api } from "~/convex/_generated/api";
-import type { Doc } from "~/convex/_generated/dataModel";
+import type { Doc, Id } from "~/convex/_generated/dataModel";
 
 const props = defineProps<{
-  post: Doc<"posts">;
+  postId: Id<"posts">;
 }>();
 
 const visibleComments = ref(false);
@@ -34,6 +35,6 @@ const {
   isLoading: commentsIsLoading,
   error,
 } = useConvexQuery(api.comments.getCommentsByPostId, {
-  postId: props.post._id,
+  postId: props.postId,
 });
 </script>

@@ -5,19 +5,19 @@ import { tokenToString } from "typescript";
 export default defineSchema({
   posts: defineTable({
     text: v.string(),
-    tokenIdentifier: v.string(),
+    user_id: v.id("users"),
   }),
 
   comments: defineTable({
     postId: v.id("posts"),
     text: v.string(),
-    tokenIdentifier: v.string(),
+    userId: v.id("users"),
   }).index("by_postId", ["postId"]),
 
   answers: defineTable({
     commentId: v.id("comments"),
+    userId: v.id("users"),
     text: v.string(),
-    tokenIdentifier: v.string(),
   }).index("by_commentId", ["commentId"]),
   likes: defineTable({
     postId: v.id("posts"),

@@ -8,6 +8,6 @@ definePageMeta({
 
 <template>
   <div class="flex h-screen w-screen justify-center">
-    <SignIn path="/sign-in" routing="path" redirectUrl="/" />
+    <SignIn fallbackRedirectUrl="/" />
   </div>
 </template>

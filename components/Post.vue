@@ -12,7 +12,7 @@ import { api } from "~/convex/_generated/api";
 
 const props = defineProps<{
   post: Doc<"posts">;
-  currentUserId: string;
+  postUser: Doc<"users">;
 }>();
 
 const editor = new Editor({
@@ -22,7 +22,7 @@ const editor = new Editor({
   editorProps: {
     attributes: {
       class:
-        "prose dark:prose-invert max-w-none focus:outline-none rounded mx-4 mt-8 py-2",
+        "prose dark:prose-invert max-w-none focus:outline-none p-2 rounded max-h-[350px]",
     },
   },
 });
@@ -30,37 +30,38 @@ const timeAgo = useTimeAgo(props.post._creationTime, {
   updateInterval: 30_000,
 });
 
-const { data: user, isLoading } = useConvexQuery(api.users.getUser, {
-  tokenIdentifier: props.post.tokenIdentifier,
-});
+const { data: currentUser, isLoading } = useConvexQuery(api.users.current, {});
 </script>
 
 <template>
   <li>
-    <Card class="relative w-full space-y-8">
+    <Card class="relative w-full" v-if="!isLoading">
       <DeletePostButton
         :post-id="post._id"
-        v-if="post.tokenIdentifier === props.currentUserId"
+        v-if="post.user_id === currentUser?._id"
       />
-      <CardHeader v-if="user && !isLoading">
+      <CardHeader class="pb-0">
         <div class="flex items-center gap-2">
-          <NuxtImg :src="user.profilePicture" class="h-16 w-16 rounded-full" />
+          <NuxtImg
+            :src="props.postUser.profilePicture"
+            class="h-16 w-16 rounded-full"
+          />
           <div>
-            <h4 class="text-2xl">{{ user.name }}</h4>
+            <h4 class="text-2xl">{{ props.postUser.name }}</h4>
             <span class="text-xs">{{ timeAgo }}</span>
           </div>
         </div>
       </CardHeader>
-      <CardContent class="max-h-[350px] overflow-y-auto">
+      <CardContent class="m-6 overflow-y-auto">
         <EditorContent :editor="editor" />
       </CardContent>
-      <CardFooter class="flex flex-col items-center justify-between gap-4">
+      <CardFooter class="flex flex-col gap-2">
         <div class="flex w-full items-center gap-4">
           <CommentForm :post-id="post._id" />
           <Heart v-if="false" :size="20" fill="" />
           <Heart v-else :size="20" fill="none" />
         </div>
-        <Comments :post="props.post" />
+        <Comments :post-id="props.post._id" />
       </CardFooter>
     </Card>
   </li>

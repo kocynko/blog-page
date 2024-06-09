@@ -1,9 +1,7 @@
 <template>
-  <div>
-    <ul>
-      <li><Answer v-for="answer in answers" :answer="answer" /></li>
-    </ul>
-  </div>
+  <ul class="space-y-4">
+    <Answer v-for="answer in answers" :answer="answer" :user="answer.user" />
+  </ul>
 </template>
 <script setup lang="ts">
 import { useConvexQuery } from "@convex-vue/core";

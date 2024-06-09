@@ -2,25 +2,17 @@ import { createClerkClient, verifyToken } from "@clerk/backend";
 import { ConvexError, v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import { action, internalQuery, mutation, query } from "./_generated/server";
+import { getCurrentUserOrThrow } from "./users";
 
 export const createPost = mutation({
   args: {
     text: v.string(),
   },
   async handler(ctx, args) {
-    const user = await ctx.auth.getUserIdentity();
-    if (!user) {
-      return null;
-    }
-    const postId = await ctx.db.insert("posts", {
+    const user = await getCurrentUserOrThrow(ctx);
+    await ctx.db.insert("posts", {
       text: args.text,
-      tokenIdentifier: user.tokenIdentifier,
-    });
-    await ctx.scheduler.runAfter(0, internal.users.store, {
-      name: user.name!,
-      email: user.email!,
-      tokenIdentifier: user.tokenIdentifier!,
-      profilePicture: user.pictureUrl!,
+      user_id: user._id,
     });
   },
 });
@@ -40,15 +32,21 @@ export const getPost = query({
 
 export const getPosts = query({
   async handler(ctx) {
-    const tokenIdentifier = (await ctx.auth.getUserIdentity())?.tokenIdentifier;
-    if (!tokenIdentifier) {
-      return null;
-    }
+    await getCurrentUserOrThrow(ctx);
+
     const posts = await ctx.db.query("posts").collect();
-    if (!posts) {
-      return null;
-    }
-    return { posts: posts, tokenIdentifier };
+    return Promise.all(
+      posts.map(async (post) => {
+        const user = await ctx.db.get(post.user_id);
+        if (!user) {
+          throw new Error("User not found");
+        }
+        return {
+          ...post,
+          user,
+        };
+      }),
+    );
   },
 });
 
@@ -57,15 +55,12 @@ export const deletePost = mutation({
     postId: v.id("posts"),
   },
   async handler(ctx, args) {
-    const userId = (await ctx.auth.getUserIdentity())?.tokenIdentifier;
-    if (!userId) {
-      return [];
-    }
+    const user = await getCurrentUserOrThrow(ctx);
     const post = await ctx.db.get(args.postId);
     if (!post) {
       throw new ConvexError("Post not found");
     }
-    if (post.tokenIdentifier !== userId) {
+    if (post.user_id !== user._id) {
       return null;
     }
     await ctx.db.delete(args.postId);
