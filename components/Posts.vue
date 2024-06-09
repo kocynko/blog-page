@@ -35,7 +35,10 @@ function onLoadMore() {
       No posts
     </h2>
   </div>
-  <Loader2 class="mx-auto h-24 w-24 animate-spin text-zinc-500" v-else />
+  <Loader2
+    class="mx-auto mt-32 h-24 w-24 animate-spin text-zinc-500"
+    v-if="isLoading"
+  />
   <Loader2
     class="fixed bottom-12 left-1/2 h-12 w-12 animate-spin text-zinc-500"
     v-if="isLoadingMore"
