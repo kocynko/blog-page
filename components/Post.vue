@@ -6,11 +6,13 @@ import { Heart } from "lucide-vue-next";
 import type { Doc } from "~/convex/_generated/dataModel";
 import CommentForm from "./CommentForm.vue";
 import Comments from "./Comments.vue";
-import { useAuth, useUser } from "vue-clerk";
+import { useTimeAgo } from "@vueuse/core";
+import { useConvexQuery } from "@convex-vue/core";
+import { api } from "~/convex/_generated/api";
 
 const props = defineProps<{
   post: Doc<"posts">;
-  userId: string | undefined;
+  currentUserId: string;
 }>();
 
 const editor = new Editor({
@@ -24,7 +26,13 @@ const editor = new Editor({
     },
   },
 });
-const { userId } = useAuth();
+const timeAgo = useTimeAgo(props.post._creationTime, {
+  updateInterval: 30_000,
+});
+
+const { data: user, isLoading } = useConvexQuery(api.users.getUser, {
+  tokenIdentifier: props.post.tokenIdentifier,
+});
 </script>
 
 <template>
@@ -32,8 +40,17 @@ const { userId } = useAuth();
     <Card class="relative w-full space-y-8">
       <DeletePostButton
         :post-id="post._id"
-        v-if="post.tokenIdentifier === props.userId"
+        v-if="post.tokenIdentifier === props.currentUserId"
       />
+      <CardHeader v-if="user && !isLoading">
+        <div class="flex items-center gap-2">
+          <NuxtImg :src="user.profilePicture" class="h-16 w-16 rounded-full" />
+          <div>
+            <h4 class="text-2xl">{{ user.name }}</h4>
+            <span class="text-xs">{{ timeAgo }}</span>
+          </div>
+        </div>
+      </CardHeader>
       <CardContent class="max-h-[350px] overflow-y-auto">
         <EditorContent :editor="editor" />
       </CardContent>

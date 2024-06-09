@@ -17,6 +17,7 @@ import type {
 import type * as answers from "../answers.js";
 import type * as comments from "../comments.js";
 import type * as posts from "../posts.js";
+import type * as users from "../users.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   answers: typeof answers;
   comments: typeof comments;
   posts: typeof posts;
+  users: typeof users;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

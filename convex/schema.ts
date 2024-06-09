@@ -23,4 +23,10 @@ export default defineSchema({
     postId: v.id("posts"),
     tokenIdentifier: v.string(),
   }).index("by_Post_Token", ["postId", "tokenIdentifier"]),
+  users: defineTable({
+    name: v.string(),
+    email: v.string(),
+    tokenIdentifier: v.string(),
+    profilePicture: v.string(),
+  }).index("by_tokenIdentifier", ["tokenIdentifier"]),
 });

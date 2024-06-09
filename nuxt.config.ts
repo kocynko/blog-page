@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     public: {
       convexUrl: process.env.CONVEX_URL,
       clerkKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
+      clerkSecretKey: process.env.CLERK_SECRET_KEY,
     },
   },
 
@@ -17,6 +18,7 @@ export default defineNuxtConfig({
     "shadcn-nuxt",
     "@nuxtjs/color-mode",
     "nuxt-tiptap-editor",
+    "@nuxt/image",
   ],
   shadcn: {
     /**
