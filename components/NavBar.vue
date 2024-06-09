@@ -2,8 +2,6 @@
   <nav
     class="fixed left-1/2 z-50 flex w-[90%] -translate-x-1/2 items-center justify-between bg-white p-4 dark:bg-zinc-900"
   >
-    <h1 class="text-2xl text-zinc-800 dark:text-zinc-300">Hello</h1>
-
     <div
       class="flex items-center justify-between gap-3"
       v-if="!isLoading && isAuthenticated"
