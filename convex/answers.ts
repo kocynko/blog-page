@@ -26,6 +26,7 @@ export const getAnswersByCommentId = query({
     const answers = await ctx.db
       .query("answers")
       .withIndex("by_commentId", (q) => q.eq("commentId", args.commentId))
+      .order("desc")
       .collect();
     return Promise.all(
       answers.map(async (answer) => {

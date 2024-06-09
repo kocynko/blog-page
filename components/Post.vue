@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { useConvexMutation, useConvexQuery } from "@convex-vue/core";
 import StarterKit from "@tiptap/starter-kit";
 import { Editor, EditorContent } from "@tiptap/vue-3";
+import { useTimeAgo } from "@vueuse/core";
 import { Heart } from "lucide-vue-next";
-import type { Doc } from "~/convex/_generated/dataModel";
+import { api } from "~/convex/_generated/api";
 import CommentForm from "./CommentForm.vue";
 import Comments from "./Comments.vue";
-import { useTimeAgo } from "@vueuse/core";
-import { useConvexQuery } from "@convex-vue/core";
-import { api } from "~/convex/_generated/api";
+import type { Doc } from "~/convex/_generated/dataModel";
 
 const props = defineProps<{
-  post: Doc<"posts">;
+  post: (typeof api.posts.getPosts._returnType.page)[0];
   postUser: Doc<"users">;
 }>();
 
@@ -31,40 +31,90 @@ const timeAgo = useTimeAgo(props.post._creationTime, {
 });
 
 const { data: currentUser, isLoading } = useConvexQuery(api.users.current, {});
+const { data: numberOfLikes, isLoading: likesLoading } = useConvexQuery(
+  api.posts.getPostLikes,
+  {
+    postId: props.post._id,
+  },
+);
+const { mutate: likePost } = useConvexMutation(api.posts.likePost);
+
+const { mutate: unLikePost } = useConvexMutation(api.posts.unlikePost);
+
+const { data: isLiked } = useConvexQuery(api.posts.hasLikedPost, {
+  postId: props.post._id,
+});
 </script>
 
 <template>
-  <li>
-    <Card class="relative w-full" v-if="!isLoading">
-      <DeletePostButton
-        :post-id="post._id"
-        v-if="post.user_id === currentUser?._id"
+  <Card
+    class="relative mx-auto w-1/3 min-w-[500px] bg-slate-100 dark:bg-zinc-900 dark:text-zinc-100"
+    v-if="!isLoading && !likesLoading"
+  >
+    <DeletePostButton
+      :post-id="post._id"
+      v-if="post.user_id === currentUser?._id"
+    />
+    <CardHeader class="pb-0">
+      <div class="flex items-center gap-2">
+        <NuxtImg
+          :src="props.postUser.profilePicture"
+          class="h-16 w-16 rounded-full"
+        />
+        <div>
+          <h4 class="text-2xl">{{ props.postUser.name }}</h4>
+          <span class="text-xs">{{ timeAgo }}</span>
+        </div>
+      </div>
+    </CardHeader>
+    <CardContent class="m-6 mx-auto space-y-4 overflow-y-auto">
+      <NuxtImg
+        :src="props.post.thumbnailUrl"
+        loading="lazy"
+        class="mx-auto max-h-[350px]"
       />
-      <CardHeader class="pb-0">
-        <div class="flex items-center gap-2">
-          <NuxtImg
-            :src="props.postUser.profilePicture"
-            class="h-16 w-16 rounded-full"
-          />
-          <div>
-            <h4 class="text-2xl">{{ props.postUser.name }}</h4>
-            <span class="text-xs">{{ timeAgo }}</span>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent class="m-6 overflow-y-auto pl-0">
-        <EditorContent :editor="editor" />
-      </CardContent>
-      <CardFooter class="flex flex-col gap-2">
-        <div class="flex w-full items-center gap-4">
-          <CommentForm :post-id="post._id" />
-          <Heart v-if="false" :size="20" fill="" />
-          <Heart v-else :size="20" fill="none" />
-        </div>
-        <Comments :post-id="props.post._id" />
-      </CardFooter>
-    </Card>
-  </li>
+      <EditorContent :editor="editor" />
+    </CardContent>
+    <CardFooter class="flex w-full flex-col gap-8">
+      <div class="flex w-full items-center gap-4">
+        <CommentForm :post-id="post._id" />
+        <span class="max-w-4 text-xs"
+          >{{
+            numberOfLikes == 1
+              ? numberOfLikes + " like"
+              : numberOfLikes + " likes"
+          }}
+        </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="hover:bg-transparent"
+          v-if="isLiked"
+          @click="
+            async () => {
+              await unLikePost({ postLikeId: isLiked?._id! });
+            }
+          "
+        >
+          <Heart fill="red" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="hover:bg-transparent"
+          v-else
+          @click="
+            async () => {
+              await likePost({ postId: post._id });
+            }
+          "
+        >
+          <Heart />
+        </Button>
+      </div>
+      <Comments :post-id="props.post._id" />
+    </CardFooter>
+  </Card>
 </template>
 
 <style lang="scss">

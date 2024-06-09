@@ -1,5 +1,7 @@
 <template>
-  <nav class="flex items-center justify-between p-4">
+  <nav
+    class="fixed z-30 flex w-1/2 translate-x-1/2 items-center justify-between bg-white p-4"
+  >
     <h1 class="text-2xl">Hello</h1>
     <NewPostButton v-if="!isLoading && isAuthenticated" />
     <div

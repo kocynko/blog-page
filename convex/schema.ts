@@ -1,10 +1,10 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { tokenToString } from "typescript";
 
 export default defineSchema({
   posts: defineTable({
     text: v.string(),
+    storageId: v.id("_storage"),
     user_id: v.id("users"),
   }),
 
@@ -19,10 +19,14 @@ export default defineSchema({
     userId: v.id("users"),
     text: v.string(),
   }).index("by_commentId", ["commentId"]),
-  likes: defineTable({
+  postLikes: defineTable({
     postId: v.id("posts"),
-    tokenIdentifier: v.string(),
-  }).index("by_Post_Token", ["postId", "tokenIdentifier"]),
+    userId: v.id("users"),
+  }).index("by_Post_Token", ["postId", "userId"]),
+  commentLikes: defineTable({
+    commentId: v.id("comments"),
+    userId: v.id("users"),
+  }).index("by_Post_Token", ["commentId", "userId"]),
   users: defineTable({
     name: v.string(),
     email: v.string(),

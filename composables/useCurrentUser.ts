@@ -1,8 +1,8 @@
-import { ref, computed, watchEffect } from "vue";
-import { api } from "../convex/_generated/api";
 import { useConvexQuery } from "@convex-vue/core";
+import { ref, watchEffect } from "vue";
 import { useAuth } from "vue-clerk";
 import type { Doc } from "~/convex/_generated/dataModel";
+import { api } from "../convex/_generated/api";
 
 // Define a function to use the current user
 export function useCurrentUser() {

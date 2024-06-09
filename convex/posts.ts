@@ -1,17 +1,22 @@
-import { createClerkClient, verifyToken } from "@clerk/backend";
+import { paginationOptsValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
-import { api, internal } from "./_generated/api";
-import { action, internalQuery, mutation, query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { getCurrentUserOrThrow } from "./users";
+
+export const generateUploadUrl = mutation(async (ctx) => {
+  return await ctx.storage.generateUploadUrl();
+});
 
 export const createPost = mutation({
   args: {
     text: v.string(),
+    storageId: v.id("_storage"),
   },
   async handler(ctx, args) {
     const user = await getCurrentUserOrThrow(ctx);
     await ctx.db.insert("posts", {
       text: args.text,
+      storageId: args.storageId,
       user_id: user._id,
     });
   },
@@ -31,22 +36,34 @@ export const getPost = query({
 });
 
 export const getPosts = query({
-  async handler(ctx) {
-    await getCurrentUserOrThrow(ctx);
-
-    const posts = await ctx.db.query("posts").collect();
-    return Promise.all(
-      posts.map(async (post) => {
-        const user = await ctx.db.get(post.user_id);
-        if (!user) {
-          throw new Error("User not found");
-        }
-        return {
-          ...post,
-          user,
-        };
-      }),
-    );
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  async handler(ctx, args) {
+    const user = await getCurrentUserOrThrow(ctx);
+    const posts = await ctx.db
+      .query("posts")
+      .order("desc")
+      .paginate(args.paginationOpts);
+    const data = posts.page.map(async (post) => {
+      const user = await ctx.db.get(post.user_id);
+      const url = await ctx.storage.getUrl(post.storageId);
+      if (!url) {
+        throw new ConvexError("Thumbnail not found");
+      }
+      if (!user) {
+        throw new ConvexError("User not found");
+      }
+      return {
+        ...post,
+        user,
+        thumbnailUrl: url,
+      };
+    });
+    return {
+      ...posts,
+      page: await Promise.all(data),
+    };
   },
 });
 
@@ -64,5 +81,57 @@ export const deletePost = mutation({
       return null;
     }
     await ctx.db.delete(args.postId);
+  },
+});
+
+export const likePost = mutation({
+  args: {
+    postId: v.id("posts"),
+  },
+  async handler(ctx, args) {
+    const user = await getCurrentUserOrThrow(ctx);
+    return await ctx.db.insert("postLikes", {
+      postId: args.postId,
+      userId: user._id,
+    });
+  },
+});
+
+export const unlikePost = mutation({
+  args: {
+    postLikeId: v.id("postLikes"),
+  },
+  async handler(ctx, args) {
+    await getCurrentUserOrThrow(ctx);
+    await ctx.db.delete(args.postLikeId);
+  },
+});
+
+export const hasLikedPost = query({
+  args: {
+    postId: v.id("posts"),
+  },
+  async handler(ctx, args) {
+    const user = await getCurrentUserOrThrow(ctx);
+    const like = await ctx.db
+      .query("postLikes")
+      .withIndex("by_Post_Token", (q) =>
+        q.eq("postId", args.postId).eq("userId", user._id),
+      )
+      .first();
+    return like;
+  },
+});
+
+export const getPostLikes = query({
+  args: {
+    postId: v.id("posts"),
+  },
+  async handler(ctx, args) {
+    const likes = await ctx.db
+      .query("postLikes")
+      .withIndex("by_Post_Token", (q) => q.eq("postId", args.postId))
+      .collect();
+    return likes.length;
   },
 });

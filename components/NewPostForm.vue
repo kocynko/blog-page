@@ -2,11 +2,15 @@
 import { FormField, FormItem } from "@/components/ui/form";
 import { useConvexMutation } from "@convex-vue/core";
 import { toTypedSchema } from "@vee-validate/zod";
+import { Loader2 } from "lucide-vue-next";
 import { useForm } from "vee-validate";
 import * as z from "zod";
 import { api } from "~/convex/_generated/api";
 
-const createDocument = useConvexMutation(api.posts.createPost);
+const { isLoading, mutate, error } = useConvexMutation(api.posts.createPost);
+const generateUploadUrl = useConvexMutation(api.posts.generateUploadUrl);
+
+const MAX_FILE_SIZE = 5000000;
 
 const props = defineProps({
   onUpload: {
@@ -14,11 +18,22 @@ const props = defineProps({
     default: () => {},
   },
 });
+// function that check filename if it is an image .png .jpg .jpeg
+const checkFileType = (file: File) => {
+  const allowedExtensions = /(\.png|\.jpeg|\.jpg)$/i;
+  return allowedExtensions.test(file.name);
+};
 const schema = z.object({
   tiptap: z
     .string()
     .min(1, "Content is required")
     .default("<h1>I love developing with vue</h1>"),
+  file: z
+    .instanceof(File)
+    .refine(
+      (file) => checkFileType(file),
+      "Only .png, .jpg, .jpeg formats are supported.",
+    ),
 });
 
 const form = useForm({
@@ -26,11 +41,19 @@ const form = useForm({
 });
 
 const onSubmit = form.handleSubmit(async (values) => {
-  await createDocument.mutate({
-    text: values.tiptap,
+  const url = await generateUploadUrl.mutate({});
+  const result = await fetch(url as string, {
+    method: "POST",
+    headers: { "Content-Type": values.file.type },
+    body: values.file,
   });
-  form.resetForm()
+  const { storageId } = await result.json();
+  await mutate({
+    text: values.tiptap,
+    storageId,
+  });
   props.onUpload();
+  form.resetForm();
 });
 </script>
 
@@ -42,6 +65,19 @@ const onSubmit = form.handleSubmit(async (values) => {
         <FormMessage />
       </FormItem>
     </FormField>
-    <Button type="submit">Create Post</Button>
+    <FormField v-slot="{ handleChange, handleBlur }" name="file">
+      <FormItem>
+        <FormLabel>Thumbnail picture</FormLabel>
+        <FormControl>
+          <Input type="file" @change="handleChange" />
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+    <Button type="submit" :disabled="isLoading" class="flex items-center gap-1">
+      <Loader2 class="animate-spin" v-if="isLoading" />
+      <span v-if="isLoading">Creating post</span>
+      <span v-else>Create post</span>
+    </Button>
   </form>
 </template>

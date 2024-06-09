@@ -7,7 +7,7 @@
           class="h-8 w-8 rounded-full"
         />
         <div
-          class="flex max-w-fit flex-col rounded bg-zinc-100 p-2 dark:bg-zinc-700"
+          class="flex max-w-fit flex-col rounded bg-zinc-400 p-2 dark:bg-zinc-900 dark:text-zinc-100"
         >
           <span class="text-xs font-bold">{{ props.user.name }}</span>
           <span>
@@ -27,7 +27,6 @@ const props = defineProps<{
   answer: Doc<"answers">;
   user: Doc<"users">;
 }>();
-console.log(props);
 
 const timeAgo = useTimeAgo(props.answer._creationTime, {
   updateInterval: 30_000,
