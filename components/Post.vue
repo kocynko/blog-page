@@ -48,7 +48,7 @@ const { data: isLiked } = useConvexQuery(api.posts.hasLikedPost, {
 
 <template>
   <Card
-    class="relative mx-auto w-1/3 min-w-[500px] bg-slate-100 dark:bg-zinc-900 dark:text-zinc-100"
+    class="relative mx-auto w-full bg-slate-100 dark:bg-zinc-900 dark:text-zinc-100 lg:w-1/3"
     v-if="!isLoading && !likesLoading"
   >
     <DeletePostButton
