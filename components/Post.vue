@@ -22,7 +22,7 @@ const editor = new Editor({
   editorProps: {
     attributes: {
       class:
-        "prose dark:prose-invert max-w-none focus:outline-none p-2 rounded max-h-[350px]",
+        "prose dark:prose-invert max-w-none focus:outline-none  rounded max-h-[350px]",
     },
   },
 });
@@ -52,7 +52,7 @@ const { data: currentUser, isLoading } = useConvexQuery(api.users.current, {});
           </div>
         </div>
       </CardHeader>
-      <CardContent class="m-6 overflow-y-auto">
+      <CardContent class="m-6 overflow-y-auto pl-0">
         <EditorContent :editor="editor" />
       </CardContent>
       <CardFooter class="flex flex-col gap-2">
