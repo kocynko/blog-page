@@ -21,7 +21,7 @@ function onLoadMore() {
 <template>
   <div
     v-if="!isLoading"
-    class="w-full space-y-4 overflow-y-scroll py-8 pt-32"
+    class="w-full space-y-4 overflow-y-scroll px-3 py-8 pt-32"
     v-infinite-scroll="[onLoadMore, { distance: 2 }]"
   >
     <Post
